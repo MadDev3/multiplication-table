@@ -1,0 +1,16 @@
+
+.app{
+  text-align: center;
+  border: 1px solid black;
+  margin-top: 20px;
+}
+
+.reg{
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px;
+}
+
+.password{
+  margin: 10px 0;
+}
