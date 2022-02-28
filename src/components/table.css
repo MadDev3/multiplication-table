@@ -10,7 +10,7 @@ label{
 }
 
 .regist{
-    margin-top: 10px;
+    margin: 10px 0;
     padding: 3px 0;
 }
 
@@ -44,6 +44,11 @@ span{
     margin: 0 10px;
 }
 
+.column{
+    display: flex;
+    flex-direction: column;
+}
+
 .cell{
     margin: 0 5px;
     padding: 5px 10px;
@@ -53,4 +58,8 @@ span{
 
 .tabl-head{
     display: flex;
+}
+
+.go-main{
+    margin-bottom: 10px;
 }

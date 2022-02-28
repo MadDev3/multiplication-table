@@ -1,11 +1,10 @@
 import { render } from "@testing-library/react";
 import React from "react";
-import './register.css';
-import jquery from "jquery";
+import './table.css';
 
 
 
-class Register extends React.Component{
+class Table extends React.Component{
 
     constructor(props){
         super(props);
@@ -37,9 +36,12 @@ class Register extends React.Component{
         this.startTest = this.startTest.bind(this);
         this.changeHard = this.changeHard.bind(this);
         this.getAuth = this.getAuth.bind(this);
+        this.getSignUp = this.getSignUp.bind(this);
         this.startTimer = this.startTimer.bind(this);
         this.nextQuestion = this.nextQuestion.bind(this);
+        this.toMain = this.toMain.bind(this);
     }
+
 
     handleChange(e){
         const target = e.target;
@@ -63,7 +65,19 @@ class Register extends React.Component{
         form.append('password_confirmation',user.password_confirm);
         fetch(url,{method: 'POST', body: form})
         .then((res) => res.json()).then((data)=>{
-            this.setState({status: data.status});
+            if(!data.status){
+                if(data.errors){
+                    if(data.errors.email){
+                        alert(data.errors.email[0]);
+                    }
+                    else if(data.errors.password){
+                        alert(data.errors.password[0]);
+                    }
+                }
+            }
+            else{
+                this.setState({status: data.status});
+            }
             console.log(data.status);
         });
        
@@ -78,9 +92,18 @@ class Register extends React.Component{
         fetch(url,{method: 'POST', body: form})
         .then((res)=>res.json())
         .then((data)=>{
-            if(data.status){
+            if(!data.status){
+                if(data.errors){
+                    if(data.errors.email){
+                        alert(data.errors.email[0]);
+                    }
+                    else{
+                        alert(data.errors);
+                    }
+                }
+            }
+            else if(data.status){
                 localStorage.setItem('email',this.state.email_user);
-                localStorage.setItem('password',this.state.password_user);
                 localStorage.setItem('access_token',data.data.access_token);
                 this.setState({auth_status: data.status});
             }
@@ -91,6 +114,10 @@ class Register extends React.Component{
         this.setState({status: true});
     }
 
+    getSignUp(){
+        this.setState({status: false});
+    }
+
     changeHard(e){
         this.setState({hard: e.target.value});
     }
@@ -98,6 +125,11 @@ class Register extends React.Component{
     startTimer(){
         if(this.state.time>0)
             this.setState({time: (this.state.time-1)});
+    }
+
+    toMain(){
+        this.setState({start_status: false, endGame: false});
+        clearInterval(this.state.timer);
     }
 
     startTest(e){
@@ -122,6 +154,7 @@ class Register extends React.Component{
             }
         });
     }
+
 
     nextQuestion(e){
         e.preventDefault();
@@ -177,14 +210,18 @@ class Register extends React.Component{
             return(
                 <form onSubmit={this.handleSubmit}>
                     <h2>Регистрация</h2>
-                    
-                    <input value={this.state.username} onChange={this.handleChange} name="username" id="username" type='text'/>
-                    
+                    <label>Введите имя <br/>
+                    <input value={this.state.username} onChange={this.handleChange} name="username" id="username" type='text' />
+                    </label>
+                    <label>Введите email <br/>
                     <input value={this.state.email} onChange={this.handleChange} name="email" id="email" type='text'/>
-                    
+                    </label>
+                    <label>Введите пароль <br/>
                     <input value={this.state.password} onChange={this.handleChange} name="password" id="password" type='password'/>
-                    
+                    </label>
+                    <label>Повторите пароль <br/>
                     <input value={this.state.password_confirm} onChange={this.handleChange} name="password_confirm" id="repeatPassword" type='password'/>
+                    </label>
                     <input value='Зарегистрироваться' type='submit' className='regist' />
                     <input onClick={this.getAuth} value='Авторизоваться' type='button'/>
                 </form>
@@ -194,91 +231,29 @@ class Register extends React.Component{
             if(this.state.auth_status){
 
                 if(this.state.endGame){
+                    const questions = this.state.questions;
+                    const answers = this.state.answers;
+                    const cur_answers = this.state.current_answers;
+                    const listQuestions = questions.map((question, index)=>
+                        <span className="cell" key={index}>{question}</span>
+                    );
+                    const listAnswers = answers.map((answer, index)=>
+                        <span className="cell" key={index}>{answer}</span>
+                    );
+                    const listCurAnswers = cur_answers.map((cur_answer, index)=>
+                        <span className="cell" key={index}>{cur_answer}</span>
+                    );
                     return(
                         <form>
                             <h3>Score: {this.state.points}</h3>
                             <h3>Timer: 0</h3>
                             <h3>END GAME</h3>
+                            <input className="go-main" onClick={this.toMain} type='button' value='Go Main' />
                             <div className="tabl-head"><span>Question</span><span>Answer</span><span>Correct</span></div>
                             <div className="row">
-                                <span className="cell">{this.state.questions[0]}</span>
-                                <span className="cell">{this.state.answers[0]}</span>
-                                <span className="cell">{this.state.current_answers[0]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[1]}</span>
-                                <span className="cell">{this.state.answers[1]}</span>
-                                <span className="cell">{this.state.current_answers[1]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[2]}</span>
-                                <span className="cell">{this.state.answers[2]}</span>
-                                <span className="cell">{this.state.current_answers[2]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[3]}</span>
-                                <span className="cell">{this.state.answers[3]}</span>
-                                <span className="cell">{this.state.current_answers[3]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[4]}</span>
-                                <span className="cell">{this.state.answers[4]}</span>
-                                <span className="cell">{this.state.current_answers[4]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[5]}</span>
-                                <span className="cell">{this.state.answers[5]}</span>
-                                <span className="cell">{this.state.current_answers[5]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[5]}</span>
-                                <span className="cell">{this.state.answers[5]}</span>
-                                <span className="cell">{this.state.current_answers[5]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[6]}</span>
-                                <span className="cell">{this.state.answers[6]}</span>
-                                <span className="cell">{this.state.current_answers[6]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[7]}</span>
-                                <span className="cell">{this.state.answers[7]}</span>
-                                <span className="cell">{this.state.current_answers[7]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[8]}</span>
-                                <span className="cell">{this.state.answers[8]}</span>
-                                <span className="cell">{this.state.current_answers[8]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[9]}</span>
-                                <span className="cell">{this.state.answers[9]}</span>
-                                <span className="cell">{this.state.current_answers[9]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[10]}</span>
-                                <span className="cell">{this.state.answers[10]}</span>
-                                <span className="cell">{this.state.current_answers[10]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[11]}</span>
-                                <span className="cell">{this.state.answers[11]}</span>
-                                <span className="cell">{this.state.current_answers[11]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[12]}</span>
-                                <span className="cell">{this.state.answers[12]}</span>
-                                <span className="cell">{this.state.current_answers[12]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[13]}</span>
-                                <span className="cell">{this.state.answers[13]}</span>
-                                <span className="cell">{this.state.current_answers[13]}</span>
-                            </div>
-                            <div className="row">
-                                <span className="cell">{this.state.questions[14]}</span>
-                                <span className="cell">{this.state.answers[14]}</span>
-                                <span className="cell">{this.state.current_answers[14]}</span>
+                                <div className="column">{listQuestions}</div>
+                                <div className="column">{listCurAnswers}</div>
+                                <div className="column">{listAnswers}</div>
                             </div>
                         </form>
                     );
@@ -296,15 +271,16 @@ class Register extends React.Component{
                                 <input onClick={this.nextQuestion} className="option" type='submit' value={this.state.options[2]} />
                                 <input onClick={this.nextQuestion} className="option" type='submit' value={this.state.options[3]} />
                             </div>
-                            <input type='button' value='Go back' />
+                            <input onClick={this.toMain} type='button' value='Go back' />
                         </form>
                     );
                 }
                 else {
                     return(
                     <form onSubmit={this.startTest}>
-                        <select value={this.state.hard} onChange={this.changeHard}> 
-                            <option selected value='1'>Easy/Легко</option>
+                        <select value={this.state.hard} onChange={this.changeHard}>
+                            <option disabled value={0}>Выберите сложность</option>
+                            <option value='1'>Easy/Легко</option>
                             <option value='2'>Hard/Тяжело</option>
                         </select>
                         <input type='submit' value='Start' className="start" />
@@ -316,13 +292,18 @@ class Register extends React.Component{
             return(
                 <form onSubmit={this.auth}>
                     <h2>Авторизация</h2>
+                    <label>Введите email <br/>
                     <input value={this.state.email_user} onChange={this.handleChange} name="email_user" id="email_user" type='text'/>
+                    </label>
+                    <label>Введите пароль <br/>
                     <input value={this.state.password_user} onChange={this.handleChange} name="password_user" id="password_user" type='password'/>
+                    </label>
                     <input value='Авторизоваться' type='submit' className='regist' />
+                    <input onClick={this.getSignUp} type='button' value='Зарегистрироваться' />
                 </form>
             );}
         }
 }
 }
 
-export default Register;
+export default Table;

@@ -1,13 +1,8 @@
 import React from 'react';
 import './App.css';
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link
-} from "react-router-dom";
 
-import Register from './components/register';
+
+import Table from './components/Table';
 
 class App extends React.Component{
 
@@ -15,7 +10,7 @@ class App extends React.Component{
     return(
       
       <div className='app'>
-        <Register />
+        <Table />
       </div>
     );
   }
